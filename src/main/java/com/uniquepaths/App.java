@@ -16,10 +16,74 @@ import com.uniquepaths.util.*;
 public class App {
     
   public static void main(String[] args) {
-    mrTest(args[0]);
+    sccTest();
   }
 
-  public static void mrTest(String fileName) {
+  private static void sccTest() {
+    File file;
+    Scanner scan = null;
+    String[] line1;
+    int graphId;
+    SCC<Integer> scc;
+    List<SCC<Integer>> sccList;
+    sccList = new ArrayList<>();
+    Map<Integer, List<String[]>> sccMap = new HashMap<>();
+    try {
+      file = new File("data/scc_file1.txt");
+      scan = new Scanner(file);
+      while (scan.hasNextLine()) {
+        line1 = scan.nextLine().split(" ");
+        System.out.println(line1[0]);
+        System.out.println(line1[1]);
+        graphId = Integer.parseInt(line1[0]);
+        if (!sccMap.containsKey(graphId)) {
+          sccMap.put(graphId, new ArrayList<String[]>());
+        }
+        sccMap.get(graphId).add(line1);
+      }
+    } catch (IOException e) {
+      e.printStackTrace();
+    } finally {
+      if (scan != null) {
+        scan.close();
+      }
+    }
+
+    for (int i = 0; i < sccMap.size(); i++) {
+      scc = new SCC<Integer>();
+      for (String[] line : sccMap.get(i)) {
+        if (line.length == 4) {
+          System.out.println("adding an edge");
+          scc.addEdge(Integer.parseInt(line[1]), Integer.parseInt(line[2]), Integer.parseInt(line[3]));
+        } else if (line.length == 3) {
+          if (line[1].equals("in")) {
+            System.out.println("adding an in node");
+            scc.addInNode(Integer.parseInt(line[2]));
+          } else if (line[1].equals("out")) {
+            System.out.println("adding an out node");
+            scc.addOutNode(Integer.parseInt(line[2]));
+          }
+        }
+      }
+      sccList.add(scc);
+    }
+    processList(sccList);
+  }
+
+  private static void processList(List<SCC<Integer>> sccList) {
+    int i = 0;
+    for (SCC<Integer> scc : sccList) {
+      scc.computeInternalDistances();
+      System.out.println(i + " size: " + scc.size());
+      System.out.println(i + " inNodes: " + scc.getInNodes());
+      System.out.println(i + " outNodes: " + scc.getOutNodes());
+      System.out.println(i + " number paths: " + scc.getTotalNumberPaths());
+      System.out.println(i + " distance: " + scc.getTotalAvgPathLength());
+      ++i;
+    }
+  }
+
+  private static void mrTest(String fileName) {
     Graph<Integer> graph;
     Graph<Integer> contracted;
     List<SCC<Integer>> sccs;
@@ -131,7 +195,7 @@ public class App {
     return graph;
   }
 
-  public static Graph<Integer> generateGraph(int size, double density) {
+  private static Graph<Integer> generateGraph(int size, double density) {
     int maxEdges = (int) ((0.5 * density * (double) (size * (size - 1)))
         + Math.random());
     List<Point> preList = new ArrayList<>();

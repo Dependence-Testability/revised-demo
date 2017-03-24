@@ -235,7 +235,7 @@ public class PathFinder {
       for (int i = position + 1; i < sorted.size(); ++i) {
         if (curr.hasEdge(sorted.get(i))) {
           Node<T> adj = sorted.get(i);
-          SuperNode<T> currCasted = (SuperNode) curr;
+          SuperNode<T> currCasted = (SuperNode<T>) curr;
           numPaths = currCasted.scc.getTotalNumberPaths();
           avgPathLen = currCasted.scc.getTotalAvgPathLength();
           avgPathRound = (int) avgPathLen;
@@ -284,7 +284,7 @@ public class PathFinder {
     Node<T> e = graph.getNode(end);
     SCC<T> entrySCC = sNode.scc;
     SCC<T> exitSCC = eNode.scc;
-    double[][] result = computeEntryExitSCC(entrySCC, exitSCC, s, e);
+    double[][] result = mrComputeEntryExitSCC(entrySCC, exitSCC, s, e);
     List<Node<T>> dfsOrdered = dfsTopoSort(contracted, sNode);
     eNode.addDistance(0);
     eNode.setVisited(true);

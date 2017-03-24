@@ -26,10 +26,6 @@ public class SCC<T> extends Graph<T> {
     this.avgPathLengths = new HashMap<>();
   }
 
-  public int size() {
-    return nodeList.size();
-  }
-
   public void addNode(Node<T> node) {
     T value = (T) node.getValue();
     getOrAddNode(value);
@@ -104,6 +100,10 @@ public class SCC<T> extends Graph<T> {
     this.totalNumberOfPaths = 0;
     this.totalAvgPathLength = 0.0;
     for (Node<T> in : inNodes) {
+      numberPaths.put(in, new HashMap<Node<T>, Integer>());
+      avgPathLengths.put(in, new HashMap<Node<T>, Double>());
+    }
+    for (Node<T> in : inNodes) {
       for (Node<T> out : outNodes) {
         result = PathApproximation.lengthDistribution(curr, in.getValue(),
             out.getValue());
@@ -142,8 +142,6 @@ public class SCC<T> extends Graph<T> {
         }
       }
     }
-    //System.out.println("In Nodes: " + inNodes);
-    //System.out.println("Out Nodes: " + outNodes);
   }
 
   public String toString() {
