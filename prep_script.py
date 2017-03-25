@@ -18,9 +18,8 @@ def moveCodeFiles():
   if os.path.exists(src_path):
     shutil.rmtree(src_path)
   dest_path = path + '/dev/src/main/java/com'
-  print src_path + '/uniquepaths/App.java'
-  #os.remove(src_path + '/uniquepaths/App.java')
   shutil.copytree(dest_path, src_path)
+  os.remove(src_path + '/uniquepaths/App.java')
 
 def moveDataFiles():
   path = os.path.abspath('.')
