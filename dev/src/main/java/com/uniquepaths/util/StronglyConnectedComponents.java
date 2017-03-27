@@ -75,6 +75,7 @@ public class StronglyConnectedComponents {
     SCC<T> scc;
     Node<T> adjNode;
     T value;
+    int sccId;
 
     for (int i = 0; i < sccList.size(); ++i) {
       scc = sccList.get(i);
@@ -87,7 +88,9 @@ public class StronglyConnectedComponents {
         for (Map.Entry<Node<T>, Integer> edge : expandedNode.getEdges()) {
           adjNode = edge.getKey();
           if (!scc.containsNode(adjNode)) {
-            contracted.addEdge(value, adjNode.getValue());
+            sccId = adjNode.getSccId();
+            contracted.addEdge(value,
+                sccList.get(sccId).getExpandedNodes().get(0).getValue());
           }
         }
       }

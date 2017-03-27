@@ -58,12 +58,20 @@ public class SCC<T> extends Graph<T> {
     return containsNode(node.getValue());
   }
 
-  public boolean containsNode(T value) {
-    return nodeMap.containsKey(value);
-  }
-
   public int getTotalNumberPaths() {
     return totalNumberOfPaths;
+  }
+
+  protected void setTotalNumberPaths(int totalNumberOfPaths) {
+    this.totalNumberOfPaths = totalNumberOfPaths;
+  }
+
+  public double getTotalAvgPathLength() {
+    return totalAvgPathLength;
+  }
+
+  protected void setTotalAvgPathLength(double totalAvgPathLength) {
+    this.totalAvgPathLength = totalAvgPathLength;
   }
 
   public int getNumberPaths(T start, T end) {
@@ -75,10 +83,6 @@ public class SCC<T> extends Graph<T> {
       numPaths = map.get(eNode);
     }
     return numPaths;
-  }
-
-  public double getTotalAvgPathLength() {
-    return totalAvgPathLength;
   }
 
   public double getAvgPathLength(T start, T end) {
@@ -111,14 +115,12 @@ public class SCC<T> extends Graph<T> {
         avgLength = result[1];
         numberPaths.get(in).put(out, pathCount);
         avgPathLengths.get(in).put(out, avgLength);
-        System.out.println("pathCount: " + pathCount);
-        System.out.println("avgLength: " + avgLength);
         totalNumberOfPaths += pathCount;
         totalAvgPathLength += (pathCount * avgLength);
       }
     }
-    totalAvgPathLength = totalNumberOfPaths == 0 ?
-        0.0 : totalAvgPathLength/totalNumberOfPaths;
+    //totalAvgPathLength = totalNumberOfPaths == 0 ?
+    //    0.0 : totalAvgPathLength/totalNumberOfPaths;
   }
 
   public void addEdges(Graph<T> graph, Graph<T> transpose) {
@@ -147,10 +149,10 @@ public class SCC<T> extends Graph<T> {
   public String toString() {
     StringBuilder strBldr = new StringBuilder();
     strBldr.append(super.toString());
-    strBldr.append("outNodes: ");
-    strBldr.append(outNodes);
-    strBldr.append("\ninNodes: ");
+    strBldr.append("inNodes: ");
     strBldr.append(inNodes);
+    strBldr.append("\noutNodes: ");
+    strBldr.append(outNodes);
     strBldr.append("\n");
     return strBldr.toString();
   }

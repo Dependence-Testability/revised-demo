@@ -16,7 +16,7 @@ import com.uniquepaths.util.*;
 public class App {
     
   public static void main(String[] args) {
-    sccTest();
+    mrTest(args[0]);
   }
 
   private static void sccTest() {
@@ -89,15 +89,18 @@ public class App {
     List<SCC<Integer>> sccs;
     double[] result;
     int s = 1;
-    int e = 41;
+    int e = 21;
 
     System.out.println("Stage 1: Preparation; Pre mapreduce stage");
     graph = readGraphFromFile(fileName);
     sccs = StronglyConnectedComponents.getStronglyConnectedComponents(graph);
 
     System.out.println("Stage 2: Mapper Stage");
+    System.out.println("Number of SCCS: " + sccs.size());
+    int id = 0;
     for (SCC<Integer> scc : sccs) {
       scc.computeInternalDistances();
+      System.out.println("SCC ID: " + id++);
       System.out.println(scc);
     }
 
@@ -114,8 +117,8 @@ public class App {
     System.out.println("MapReduce Results: ");
     System.out.println("\tNumber of Paths: " + result[0]);
     System.out.println("\tAverage length of paths: " + result[1]);
-    result = PathApproximation.lengthDistribution(graph, s, e);
-    System.out.println("Estimation Results: ");
+    result = PathFinder.uniquePaths(graph, s, e);
+    System.out.println("Actual Results: ");
     System.out.println("\tNumber of Paths: " + result[0]);
     System.out.println("\tAverage length of paths: " + result[1]);
   }
@@ -143,46 +146,6 @@ public class App {
       }
     }
     return graph;
-  }
-
-  private static void nonMRCode() {
-    Graph<Integer> graph;
-    List<SCC<Integer>> sccs;
-    graph = generateGraphWithSCC();
-    System.out.println("Original Graph");
-    System.out.println(graph);
-
-    sccs = StronglyConnectedComponents.getStronglyConnectedComponents(graph);
-    System.out.println("Number of SCCs: " + sccs.size());
-    System.out.println();
-    System.out.println("SCCs:");
-
-    for (SCC<Integer> scc : sccs) {
-      System.out.println(scc);
-      System.out.println();
-    }
-
-    Graph<Integer> contracted
-        = StronglyConnectedComponents.contractSCCs(sccs);
-    System.out.println("Contracted Graph:");
-    System.out.println(contracted);
-
-    Map<Node<Integer>, Double> likelihood = new HashMap<>();
-    Map<Node<Integer>, Integer> counter = new HashMap<>(); 
-    System.out.println(PathApproximation.naivePathGeneration(graph, likelihood, counter, 1, 5));
-    System.out.println("Counter:");
-    System.out.println(counter);
-    System.out.println("Likelihood:");
-    System.out.println(likelihood);
-
-    double[] result = PathApproximation.lengthDistribution(graph, 1, 5);
-    System.out.println(result[0]);
-    System.out.println(result[1]);
-
-    result = PathFinder.dagTraversal(graph, contracted, 2, 5, 1, 5);
-    System.out.println("Cool");
-    System.out.println(result[0]);
-    System.out.println(result[1]);
   }
 
   private static Graph<Integer> generateGraphWithSCC() {

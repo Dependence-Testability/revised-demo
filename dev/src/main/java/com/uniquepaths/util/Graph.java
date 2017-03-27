@@ -64,6 +64,10 @@ public class Graph<T> {
     return node;
   }
 
+  protected boolean containsNode(T value) {
+    return nodeMap.containsKey(value);
+  }
+
   protected boolean addSuperNode(int sccNum, SCC<T> scc) {
     SuperNode<T> node = new SuperNode<T>(sccNum, scc);
     boolean added = false;

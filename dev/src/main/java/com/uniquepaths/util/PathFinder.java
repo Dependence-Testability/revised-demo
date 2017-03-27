@@ -103,62 +103,62 @@ public class PathFinder {
     Node<T> e = graph.getNode(end);
     SCC<T> entrySCC = sNode.scc;
     SCC<T> exitSCC = eNode.scc;
-    double[][] result = computeEntryExitSCC(entrySCC, exitSCC, s, e);
-    List<Node<T>> dfsOrdered = dfsTopoSort(contracted, sNode);
-    eNode.addDistance(0);
+    computeEntryExitSCC(entrySCC, exitSCC, s, e);
+    List<Node<T>> dfsOrdered = dfsTopoSort(contracted, sNode, eNode);
+    sNode.addDistance((int)entrySCC.getTotalAvgPathLength(),
+        entrySCC.getTotalNumberPaths());
+    eNode.addDistance((int)exitSCC.getTotalAvgPathLength(),
+        exitSCC.getTotalNumberPaths());
     eNode.setVisited(true);
-    calculatePath(dfsOrdered, 0, sNode, eNode);
-    double lengthSums = 0;
-    double totalNumPaths = 0;
+    System.out.println(dfsOrdered);
+    calculatePath(dfsOrdered, 0, sNode);
+    double lengthSums = 0.0;
+    double totalNumPaths = 0.0;
     for (Map.Entry<Integer, Integer> entry : sNode.getDistances().entrySet()) {
       lengthSums += entry.getValue() * entry.getKey();
       totalNumPaths += entry.getValue();
     }
-    totalNumPaths = totalNumPaths * result[0][0] * result[1][0];
     lengthSums = totalNumPaths == 0.0 ? 0.0
         : lengthSums/totalNumPaths;
-    lengthSums *= result[0][1];
-    lengthSums *= result[1][1];
     PathApproximation.resetGraph(graph);
     return new double[]{totalNumPaths, lengthSums};
   }
 
-  private static <T> double[][] computeEntryExitSCC(SCC<T> entry, SCC<T> exit,
+  private static <T> void computeEntryExitSCC(SCC<T> entry, SCC<T> exit,
       Node<T> s, Node<T> e) {
-    double[][] result = new double[2][2];
-    double result1 = 0.0;
-    double result2 = 0.0;
-    if (exit.size() > 1) {
+    double[] result = new double[2];
+    int result1 = 1;
+    double result2 = 1.0;
+    if (entry.size() > 1) {
       for (Node<T> node : entry.getOutNodes()) {
-        result[0] = PathApproximation.lengthDistribution(entry, s.getValue(),
-            node.getValue());
-        result1 += result[0][0];
-        result2 += result[0][1] * result[0][0];
+        // result = PathApproximation.lengthDistribution(entry, s.getValue(),
+        //     node.getValue());
+        result = uniquePaths(entry, s.getValue(), node.getValue());
+        result1 += result[0];
+        result2 += result[1] * result[0];
       }
       result2 = result1 == 0.0 ? 0.0 : result2/result1;
-      result[0][0] = result1;
-      result[0][1] = result2;
-      result1 = result2 = 0.0;
-    } else {
-      result[0][0] = 1.0;
-      result[0][1] = 1.0;
+      entry.setTotalNumberPaths((int)result1);
+      entry.setTotalAvgPathLength(result2);
     }
 
-    if (entry.size() > 1) {
+    result1 = 1;
+    result2 = 1.0;
+
+    if (exit.size() > 1) {
       for (Node<T> node : exit.getInNodes()) {
-        result[1] = PathApproximation.lengthDistribution(exit,
-            node.getValue(), e.getValue());
-        result1 += result[1][0];
-        result2 += result[1][1] * result[1][0];
+        // result = PathApproximation.lengthDistribution(exit,
+        //     node.getValue(), e.getValue());
+        result = uniquePaths(exit, node.getValue(), e.getValue());
+        result1 += result[0];
+        result2 += result[1] * result[0];
       }
       result2 = result1 == 0.0 ? 0.0 : result2/result1;
-      result[1][0] = result1;
-      result[1][1] = result2;
-    } else {
-      result[1][0] = 1.0;
-      result[1][1] = 1.0;
+      System.out.println("end: " + result1);
+      System.out.println("end: " + result2);
+      exit.setTotalNumberPaths((int)Math.round(result1));
+      exit.setTotalAvgPathLength(result2);
     }
-    return result;
   }
 
   /**
@@ -172,10 +172,10 @@ public class PathFinder {
    * @return an {@link List} of the nodes in order of Topological Sort
    *
    */
-  private static <T> List<Node<T>> dfsTopoSort(Graph<T> graph, Node<T> sNode) {
+  private static <T> List<Node<T>> dfsTopoSort(Graph<T> graph, Node<T> sNode, Node<T> eNode) {
     List<Node<T>> topoSorted = new ArrayList<>();
     Set<Node<T>> tSortSet = new HashSet<>();
-    dfsTopoSort(topoSorted, tSortSet, sNode);
+    dfsTopoSort(topoSorted, tSortSet, sNode, eNode);
 
     // Since topological sort returns the list of nodes in order of
     // finishing times, the first node we exam (our start node), will
@@ -188,13 +188,13 @@ public class PathFinder {
 
   /** Auxiliary method to aid in computing the Topological Sort */
   private static <T> void dfsTopoSort(List<Node<T>> tSorted,
-      Set<Node<T>> tSortSet, Node<T> node) {
+      Set<Node<T>> tSortSet, Node<T> node, Node<T> end) {
     Node<T> adjNode;
     node.setVisited(true);
     for (Map.Entry<Node<T>, Integer> edge : node.getEdges()) {
       adjNode = edge.getKey();
       if (!adjNode.visited() && !tSortSet.contains(adjNode)) {
-        dfsTopoSort(tSorted, tSortSet, adjNode);
+        dfsTopoSort(tSorted, tSortSet, adjNode, end);
       }
     }
     node.setVisited(false);
@@ -225,8 +225,8 @@ public class PathFinder {
    *
    */
   private static <T> void calculatePath(List<Node<T>> sorted,
-      int position, Node<T> curr, Node<T> sEnd) {
-    int numPaths;
+      int position, Node<T> curr) {
+    int numPaths = 0;
     double avgPathLen = 0.0;
     int avgPathRound;
     int currCount;
@@ -238,21 +238,26 @@ public class PathFinder {
           SuperNode<T> currCasted = (SuperNode<T>) curr;
           numPaths = currCasted.scc.getTotalNumberPaths();
           avgPathLen = currCasted.scc.getTotalAvgPathLength();
-          avgPathRound = (int) avgPathLen;
-          calculatePath(sorted, i, adj, sEnd);
+          System.out.println(avgPathLen);
+          avgPathRound = (int) Math.round(avgPathLen);
+          calculatePath(sorted, i, adj);
           for (Map.Entry<Integer, Integer> entry
               : adj.getDistances().entrySet()) {
             currCount = curr.getDistanceCount(entry.getKey() + avgPathRound)
                 == null ? 0 : curr.getDistanceCount(
                     entry.getKey() + avgPathRound);
+            System.out.println(curr);
+            System.out.println("numPaths: " + numPaths);
+            System.out.println("currCount : " + currCount);
+            System.out.println("avgPathRound : " + avgPathRound);
+            System.out.println("entry.key: " + entry.getKey());
             curr.addDistance(entry.getKey() + avgPathRound,
-                entry.getValue() + currCount * numPaths);
+                (entry.getValue() + currCount) * numPaths);
           }
         }
       }
     }
   }
-
 
   /**
    * Finds the number of paths that exist between two nodes
@@ -285,10 +290,10 @@ public class PathFinder {
     SCC<T> entrySCC = sNode.scc;
     SCC<T> exitSCC = eNode.scc;
     double[][] result = mrComputeEntryExitSCC(entrySCC, exitSCC, s, e);
-    List<Node<T>> dfsOrdered = dfsTopoSort(contracted, sNode);
+    List<Node<T>> dfsOrdered = mrDfsTopoSort(contracted, sNode);
     eNode.addDistance(0);
     eNode.setVisited(true);
-    calculatePath(dfsOrdered, 0, sNode, eNode);
+    calculatePath(dfsOrdered, 0, sNode);
     double lengthSums = 0;
     double totalNumPaths = 0;
     for (Map.Entry<Integer, Integer> entry : sNode.getDistances().entrySet()) {
@@ -357,7 +362,7 @@ public class PathFinder {
       Node<T> sNode) {
     List<Node<T>> topoSorted = new ArrayList<>();
     Set<Node<T>> tSortSet = new HashSet<>();
-    dfsTopoSort(topoSorted, tSortSet, sNode);
+    mrDfsTopoSort(topoSorted, tSortSet, sNode);
 
     // Since topological sort returns the list of nodes in order of
     // finishing times, the first node we exam (our start node), will
@@ -376,7 +381,7 @@ public class PathFinder {
     for (Map.Entry<Node<T>, Integer> edge : node.getEdges()) {
       adjNode = edge.getKey();
       if (!adjNode.visited() && !tSortSet.contains(adjNode)) {
-        dfsTopoSort(tSorted, tSortSet, adjNode);
+        mrDfsTopoSort(tSorted, tSortSet, adjNode);
       }
     }
     node.setVisited(false);
@@ -433,6 +438,7 @@ public class PathFinder {
           }
         }
       }
+      curr.setVisited(false);
     }
   }
 }
