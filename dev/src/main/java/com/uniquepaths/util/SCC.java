@@ -62,7 +62,7 @@ public class SCC<T> extends Graph<T> {
     return totalNumberOfPaths;
   }
 
-  protected void setTotalNumberPaths(int totalNumberOfPaths) {
+  public void setTotalNumberPaths(int totalNumberOfPaths) {
     this.totalNumberOfPaths = totalNumberOfPaths;
   }
 
@@ -70,7 +70,7 @@ public class SCC<T> extends Graph<T> {
     return totalAvgPathLength;
   }
 
-  protected void setTotalAvgPathLength(double totalAvgPathLength) {
+  public void setTotalAvgPathLength(double totalAvgPathLength) {
     this.totalAvgPathLength = totalAvgPathLength;
   }
 
@@ -119,8 +119,8 @@ public class SCC<T> extends Graph<T> {
         totalAvgPathLength += (pathCount * avgLength);
       }
     }
-    //totalAvgPathLength = totalNumberOfPaths == 0 ?
-    //    0.0 : totalAvgPathLength/totalNumberOfPaths;
+    totalAvgPathLength = totalNumberOfPaths == 0 ?
+       0.0 : totalAvgPathLength/totalNumberOfPaths;
   }
 
   public void addEdges(Graph<T> graph, Graph<T> transpose) {

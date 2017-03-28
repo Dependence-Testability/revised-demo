@@ -52,9 +52,7 @@ public class UniquePaths {
         = StronglyConnectedComponents.getStronglyConnectedComponents(graph);
     writeToInputFile(sccs);
     mapReduce(args);
-    Map<Integer, Double> numPaths = new HashMap<>();
-    Map<Integer, Double> avgPathLen = new HashMap<>();
-    readSCCInfo(numPaths, avgPathLen);
+    readSCCInfo(sccs);
     Graph<Integer> contracted = StronglyConnectedComponents.contractSCCs(sccs);
     start = graph.getNode(s);
     end = graph.getNode(e);
@@ -170,8 +168,6 @@ public class UniquePaths {
       FileInputFormat.addInputPath(job, new Path(otherArgs.get(0)));
       FileOutputFormat.setOutputPath(job, new Path(otherArgs.get(1)));
       job.waitForCompletion(true);
-
-      File file = new File("uniquepaths/output/part-r-00000");
     } catch (IOException e) {
       e.printStackTrace();
     } catch (InterruptedException e) {
@@ -181,21 +177,26 @@ public class UniquePaths {
     }
   }
 
-  private static void readSCCInfo(Map<Integer, Double> numPaths,
-      Map<Integer, Double> avgPathLen) {
+  private static void readSCCInfo(List<SCC<Integer>> sccList) {
     File file;
     Scanner scan = null;
     String[] line;
+    SCC<Integer> scc;
+    int pos;
+    double totalNumPaths;
+    double totalAvgPathLen;
     try {
       file = new File("uniquepaths/output/part-r-00000");
       scan = new Scanner(file);
       while (scan.hasNextLine()) {
         line = scan.nextLine().split(" : ");
-        numPaths.put(Integer.parseInt(line[0]),
-            Double.parseDouble(line[1]));
+        pos = Integer.parseInt(line[0])
+        scc = sccList.get(pos);
+        totalNumPaths = Double.parseDouble(line[1]);
         line = scan.nextLine().split(" : ");
-        avgPathLen.put(Integer.parseInt(line[0]),
-            Double.parseDouble(line[1]));
+        totalAvgPathLen = Double.parseDouble(line[1]);
+        scc.setTotalNumberOfPaths(totalNumPaths);
+        scc.setTotalAvgPathLength(totalAvgPathLen);
       }
     } catch (IOException e) {
       e.printStackTrace();
