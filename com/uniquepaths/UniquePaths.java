@@ -44,6 +44,8 @@ public class UniquePaths {
     double[] result;
     Node<Integer> start;
     Node<Integer> end;
+    int superS;
+    int superE;
     Graph<Integer> graph = readGraphFromFile(args[0]);
     int s = Integer.parseInt(args[1]);
     int e = Integer.parseInt(args[2]);
@@ -56,10 +58,14 @@ public class UniquePaths {
     Graph<Integer> contracted = StronglyConnectedComponents.contractSCCs(sccs);
     start = graph.getNode(s);
     end = graph.getNode(e);
-    result = PathFinder.mrDagTraversal(graph, contracted, numPaths, avgPathLen,
-        sccs.get(start.getSccId()).getExpandedNodes().get(0).getValue(),
-        sccs.get(end.getSccId()).getExpandedNodes().get(0).getValue(), s, e);
+    superS = sccs.get(start.getSccId()).getExpandedNodes().get(0).getValue();
+    superE = sccs.get(end.getSccId()).getExpandedNodes().get(0).getValue();
+    result = PathFinder.dagTraversal(graph, contracted, superS, superE, s, e);
     System.out.println("MapReduce Results: ");
+    System.out.println("\tNumber of Paths: " + result[0]);
+    System.out.println("\tAverage length of paths: " + result[1]);
+    result = PathFinder.uniquePaths(graph, s, e);
+    System.out.println("Actual Results: ");
     System.out.println("\tNumber of Paths: " + result[0]);
     System.out.println("\tAverage length of paths: " + result[1]);
   }
@@ -190,7 +196,7 @@ public class UniquePaths {
       scan = new Scanner(file);
       while (scan.hasNextLine()) {
         line = scan.nextLine().split(" : ");
-        pos = Integer.parseInt(line[0])
+        pos = Integer.parseInt(line[0]);
         scc = sccList.get(pos);
         totalNumPaths = Double.parseDouble(line[1]);
         line = scan.nextLine().split(" : ");

@@ -111,18 +111,4 @@ public class StronglyConnectedComponents {
     }
     return transpose;
   }
-
-  public static <T> NodeTuple<T> getLinkBetweenSCC(Graph<T> graph,
-      SCC<T> orig, SCC<T> dest) {
-    Set<Node<T>> outNodes = orig.getOutNodes();
-    Set<Node<T>> inNodes = dest.getOutNodes();
-    for (Node<T> outNode : outNodes) {
-      for (Node<T> inNode : inNodes) {
-        if (graph.edgeExists(outNode.getValue(), inNode.getValue())) {
-          return new NodeTuple<>(outNode, inNode);
-        }
-      }
-    }
-    return null;
-  }
 }

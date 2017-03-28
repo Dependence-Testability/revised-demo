@@ -154,8 +154,6 @@ public class PathFinder {
         result2 += result[1] * result[0];
       }
       result2 = result1 == 0.0 ? 0.0 : result2/result1;
-      System.out.println("end: " + result1);
-      System.out.println("end: " + result2);
       exit.setTotalNumberPaths((int)Math.round(result1));
       exit.setTotalAvgPathLength(result2);
     }
@@ -238,7 +236,6 @@ public class PathFinder {
           SuperNode<T> currCasted = (SuperNode<T>) curr;
           numPaths = currCasted.scc.getTotalNumberPaths();
           avgPathLen = currCasted.scc.getTotalAvgPathLength();
-          System.out.println(avgPathLen);
           avgPathRound = (int) Math.round(avgPathLen);
           calculatePath(sorted, i, adj);
           for (Map.Entry<Integer, Integer> entry
@@ -246,199 +243,11 @@ public class PathFinder {
             currCount = curr.getDistanceCount(entry.getKey() + avgPathRound)
                 == null ? 0 : curr.getDistanceCount(
                     entry.getKey() + avgPathRound);
-            System.out.println(curr);
-            System.out.println("numPaths: " + numPaths);
-            System.out.println("currCount : " + currCount);
-            System.out.println("avgPathRound : " + avgPathRound);
-            System.out.println("entry.key: " + entry.getKey());
             curr.addDistance(entry.getKey() + avgPathRound,
-                (entry.getValue() + currCount) * numPaths);
+                (entry.getValue() + currCount) * numPaths) ;
           }
         }
       }
-    }
-  }
-
-  /**
-   * Finds the number of paths that exist between two nodes
-   * in a graph as well as the average lengths of those paths.
-   *
-   * @param graph the Directed Acyclical Graph from which we
-   *     are to determine the number of paths and average lengths
-   *     of those paths.
-   * @param start the value in the contracted graph from which we are to
-   *     begin traversal
-   * @param end the value in the contracted graph at which we are to end
-   *     our traversal
-   * @param start the value in the original graph from which we are to
-   *     begin traversal
-   * @param end the value in the original graph at which we are to end
-   *     our traversal
-   *
-   * @return an array containing the number of paths from
-   *     <code>start</code> to <code>end</code> in <code>graph</code>
-   *     and the average length of those paths.
-   *
-   */
-  public static <T> double[] mrDagTraversal(Graph<T> graph,
-      Graph<T> contracted, Map<Integer, Double> numberPaths,
-      Map<Integer, Double> avgPathLen, T sStart, T sEnd, T start, T end) {
-    SuperNode<T> sNode = (SuperNode<T>) contracted.getNode(sStart);
-    SuperNode<T> eNode = (SuperNode<T>) contracted.getNode(sEnd);
-    Node<T> s = graph.getNode(start);
-    Node<T> e = graph.getNode(end);
-    SCC<T> entrySCC = sNode.scc;
-    SCC<T> exitSCC = eNode.scc;
-    double[][] result = mrComputeEntryExitSCC(entrySCC, exitSCC, s, e);
-    List<Node<T>> dfsOrdered = mrDfsTopoSort(contracted, sNode);
-    eNode.addDistance(0);
-    eNode.setVisited(true);
-    calculatePath(dfsOrdered, 0, sNode);
-    double lengthSums = 0;
-    double totalNumPaths = 0;
-    for (Map.Entry<Integer, Integer> entry : sNode.getDistances().entrySet()) {
-      lengthSums += entry.getValue() * entry.getKey();
-      totalNumPaths += entry.getValue();
-    }
-    totalNumPaths = totalNumPaths * result[0][0] * result[1][0];
-    lengthSums = totalNumPaths == 0.0 ? 0.0
-        : lengthSums/totalNumPaths;
-    lengthSums *= result[0][1];
-    lengthSums *= result[1][1];
-    PathApproximation.resetGraph(graph);
-    return new double[]{totalNumPaths, lengthSums};
-  }
-
-  private static <T> double[][] mrComputeEntryExitSCC(SCC<T> entry,
-      SCC<T> exit, Node<T> s, Node<T> e) {
-    double[][] result = new double[2][2];
-    double result1 = 0.0;
-    double result2 = 0.0;
-    if (exit.size() > 1) {
-      for (Node<T> node : entry.getOutNodes()) {
-        result[0] = PathApproximation.lengthDistribution(entry, s.getValue(),
-            node.getValue());
-        result1 += result[0][0];
-        result2 += result[0][1] * result[0][0];
-      }
-      result2 = result1 == 0.0 ? 0.0 : result2/result1;
-      result[0][0] = result1;
-      result[0][1] = result2;
-      result1 = result2 = 0.0;
-    } else {
-      result[0][0] = 1.0;
-      result[0][1] = 1.0;
-    }
-
-    if (entry.size() > 1) {
-      for (Node<T> node : exit.getInNodes()) {
-        result[1] = PathApproximation.lengthDistribution(exit,
-            node.getValue(), e.getValue());
-        result1 += result[1][0];
-        result2 += result[1][1] * result[1][0];
-      }
-      result2 = result1 == 0.0 ? 0.0 : result2/result1;
-      result[1][0] = result1;
-      result[1][1] = result2;
-    } else {
-      result[1][0] = 1.0;
-      result[1][1] = 1.0;
-    }
-    return result;
-  }
-
-  /**
-   * Performs a Topologicial Sort of the nodes in graph in
-   * order of Depth-First Search.
-   *
-   * @param graph the graph for which the Topological Sort
-   *     is to take place on.
-   * @param sNode the node to begin the Topological Sort at.
-   *
-   * @return an {@link List} of the nodes in order of Topological Sort
-   *
-   */
-  private static <T> List<Node<T>> mrDfsTopoSort(Graph<T> graph,
-      Node<T> sNode) {
-    List<Node<T>> topoSorted = new ArrayList<>();
-    Set<Node<T>> tSortSet = new HashSet<>();
-    mrDfsTopoSort(topoSorted, tSortSet, sNode);
-
-    // Since topological sort returns the list of nodes in order of
-    // finishing times, the first node we exam (our start node), will
-    // always be the last node in the list. For clarity in the algorithm
-    // for computing the number of paths from s to t as well as the
-    // average length of those paths between them, we will reverse the list.
-    Collections.reverse(topoSorted);
-    return topoSorted;
-  }
-
-  /** Auxiliary method to aid in computing the Topological Sort */
-  private static <T> void mrDfsTopoSort(List<Node<T>> tSorted,
-      Set<Node<T>> tSortSet, Node<T> node) {
-    Node<T> adjNode;
-    node.setVisited(true);
-    for (Map.Entry<Node<T>, Integer> edge : node.getEdges()) {
-      adjNode = edge.getKey();
-      if (!adjNode.visited() && !tSortSet.contains(adjNode)) {
-        mrDfsTopoSort(tSorted, tSortSet, adjNode);
-      }
-    }
-    node.setVisited(false);
-    tSorted.add(node);
-    tSortSet.add(node);
-  }
-
-  /**
-   * Computes the number of paths that exist between two nodes in a graph.
-   * 
-   * For this algorithm we perform a Depth-First Search (DFS) and only look
-   * at unvisited adjacent nodes that succeed the current node in order of 
-   * Topological Sort. Because this is a Directed Acyclical Graph (DAG) we
-   * can guarantee that any valid-adjacent nodes are nodes that we would
-   * have to repeatedly visit everytime we come across that node in the graph.
-   * Due to this property we only have to visit each node in the graph once 
-   * and make a record of the number of possible paths from that node to the 
-   * destination node, any node that has a directed edge to that node can then 
-   * aggregate its path count based off of this pre-existing record for its 
-   * adjacent node.
-   *
-   * @param sorted a list of nodes sorted according to Topological Sort. The
-   *     nodes we are computing the number of paths for in this graph must be 
-   *     contained within this list.
-   * @param position the current position in <code>sorted</code>
-   * @param curr the node for which we are computing the number of paths
-   *     to the final node in the topological sort.
-   *
-   */
-  private static <T> void mrCalculatePath(List<Node<T>> sorted,
-      Map<Integer, Integer> numberPaths, Map<Integer, Double> avgPathLen,
-      int position, Node<T> curr, Node<T> sEnd) {
-    int numPaths;
-    double avgLen = 0.0;
-    int avgPathRound;
-    int currCount;
-    if (!curr.visited()) {
-      curr.setVisited(true);
-      for (int i = position + 1; i < sorted.size(); ++i) {
-        if (curr.hasEdge(sorted.get(i))) {
-          Node<T> adj = sorted.get(i);
-          SuperNode<T> currCasted = (SuperNode<T>) curr;
-          numPaths = numberPaths.get(currCasted.scc);
-          avgLen = avgPathLen.get(currCasted.scc);
-          avgPathRound = (int) avgLen;
-          mrCalculatePath(sorted, numberPaths, avgPathLen, i, adj, sEnd);
-          for (Map.Entry<Integer, Integer> entry
-              : adj.getDistances().entrySet()) {
-            currCount = curr.getDistanceCount(entry.getKey() + avgPathRound)
-                == null ? 0 : curr.getDistanceCount(
-                    entry.getKey() + avgPathRound);
-            curr.addDistance(entry.getKey() + avgPathRound,
-                entry.getValue() + currCount * numPaths);
-          }
-        }
-      }
-      curr.setVisited(false);
     }
   }
 }
