@@ -189,7 +189,7 @@ public class UniquePaths {
     String[] line;
     SCC<Integer> scc;
     int pos;
-    double totalNumPaths;
+    int totalNumPaths;
     double totalAvgPathLen;
     try {
       file = new File("uniquepaths/output/part-r-00000");
@@ -198,7 +198,7 @@ public class UniquePaths {
         line = scan.nextLine().split(" : ");
         pos = Integer.parseInt(line[0]);
         scc = sccList.get(pos);
-        totalNumPaths = Double.parseDouble(line[1]);
+        totalNumPaths = (int) Double.parseDouble(line[1]);
         line = scan.nextLine().split(" : ");
         totalAvgPathLen = Double.parseDouble(line[1]);
         scc.setTotalNumberPaths(totalNumPaths);
