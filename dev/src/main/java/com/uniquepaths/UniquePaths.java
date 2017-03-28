@@ -201,7 +201,7 @@ public class UniquePaths {
         totalNumPaths = Double.parseDouble(line[1]);
         line = scan.nextLine().split(" : ");
         totalAvgPathLen = Double.parseDouble(line[1]);
-        scc.setTotalNumberOfPaths(totalNumPaths);
+        scc.setTotalNumberPaths(totalNumPaths);
         scc.setTotalAvgPathLength(totalAvgPathLen);
       }
     } catch (IOException e) {
