@@ -109,4 +109,4 @@ can be explained in the following steps:
 Command to make running A LOT easier:
   - Clone Repo into directory labeled 'uniquepaths'
   - From hadoop-hdfs directory:
-      cd uniquepaths/ && rm -rf up.jar input/file1 output/ com/uniquepaths/*.class com/uniquepaths/*/*.class && javac com/uniquepaths/UniquePaths.java com/uniquepaths/*/*.java -Xlint:unchecked && jar cf up.jar com/uniquepaths/UniquePaths.class com/uniquepaths/*/*.class && cd .. && hadoop jar uniquepaths/up.jar com.uniquepaths.UniquePaths uniquepaths/data/graph1.txt 1 44 uniquepaths/input/ uniquepaths/output/
+      cd uniquepaths/ && rm -rf up.jar input/file1 output/ com/uniquepaths/*.class com/uniquepaths/*/*.class && javac com/uniquepaths/UniquePaths.java com/uniquepaths/*/*.java -Xlint:unchecked && jar cf up.jar com/uniquepaths/UniquePaths.class com/uniquepaths/*/*.class && cd .. && hadoop jar uniquepaths/up.jar com.uniquepaths.UniquePaths uniquepaths/data/graph5.txt 1 21 uniquepaths/input/ uniquepaths/output/
