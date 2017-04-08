@@ -1,5 +1,7 @@
 package com.uniquepaths;
 
+import com.uniquepaths.mr.AggregatorMapper;
+import com.uniquepaths.mr.AggregatorReducer;
 import com.uniquepaths.mr.GraphMapper;
 import com.uniquepaths.mr.GraphReducer;
 import com.uniquepaths.util.Edge;
@@ -41,7 +43,6 @@ import org.apache.hadoop.util.StringUtils;
 public class UniquePaths {
     
   public static void main(String[] args) {
-    System.out.println(arg);
     double[] result;
     Node<Integer> start;
     Node<Integer> end;
