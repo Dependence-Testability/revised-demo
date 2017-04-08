@@ -10,24 +10,29 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Reducer;
 
 public class AggregatorReducer
-      extends Reducer<Text, DoubleWritable, Text, DoubleWritable> {
+      extends Reducer<Text, Text, Text, DoubleWritable> {
 
-  private static final String AVG_PATH_LEN = "average path length";
+  private static final String NUM_PATH = "number";
+  private static final String AVG_PATH_LEN = "length";
 
   @Override
-  public void reduce(Text key, Iterable<DoubleWritable> values,
+  public void reduce(Text key, Iterable<Text> values,
       Context context) throws IOException, InterruptedException {
-    double aggregate = 0.0;
-    double size = 0.0;
+    double number = 0.0;
+    double length = 0.0
     String keyText = key.toString();
     for (DoubleWritable value : values) {
-      aggregate += value.get();
-      ++size;
+      String[] line = value.toString().split(" ");
+      if (keyText.contains(NUM_PATH)) {
+        number = Double.parseDouble(line[1]);
+      } else if (keyText.contains(AVG_PATH_LEN)) {
+        length = Double.parseDouble(line[1]);
+      }
     }
-
-    if (keyText.contains(AVG_PATH_LEN)) {
-      aggregate /= size;
-    }
-    context.write(key, new DoubleWritable(aggregate));
+    length = number == 0.0 ? 0.0 : length/number;
+    context.write(new Text(key + " number of paths: "),
+        new DoubleWritable(number));
+    context.write(new Text(key + " average path length: "),
+        new DoubleWritable(length));
   }
 }

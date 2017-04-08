@@ -39,7 +39,6 @@ public class App {
     sccs = StronglyConnectedComponents.getStronglyConnectedComponents(graph);
     System.out.println("Stage 2: Mapper Stage");
     System.out.println("Number of SCCS: " + sccs.size());
-    int id = 0;
     for (SCC<Integer> scc : sccs) {
       scc.computeInternalDistances();
       if (scc.containsNode(s)) {
@@ -58,8 +57,6 @@ public class App {
         scc.getInNodes().add(entries.get(0).getValue());
         scc.getOutNodes().add(entries.get(0).getValue());
       }
-      System.out.println("SCC ID: " + id++);
-      System.out.println(scc);
     }
 
     permuted = StronglyConnectedComponents.getPermutedSCCs(sccs);

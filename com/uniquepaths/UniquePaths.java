@@ -55,6 +55,24 @@ public class UniquePaths {
     int e = Integer.parseInt(args[2]);
     List<SCC<Integer>> sccs
         = StronglyConnectedComponents.getStronglyConnectedComponents(graph);
+    for (SCC<Integer> scc : sccs) {
+      if (scc.containsNode(s)) {
+        scc.getInNodes().clear();
+        scc.addInNode(s);
+      }
+      if (scc.containsNode(e)) {
+        scc.getOutNodes().clear();
+        scc.addOutNode(e);
+      }
+      if (scc.size() == 1) {
+        List<Map.Entry<Integer, Node<Integer>>> entries
+            = new ArrayList<>(scc.getNodes());
+        scc.getInNodes().clear();
+        scc.getOutNodes().clear();
+        scc.getInNodes().add(entries.get(0).getValue());
+        scc.getOutNodes().add(entries.get(0).getValue());
+      }
+    }
     List<SCC<Integer>> permutations
         = StronglyConnectedComponents.getPermutedSCCs(sccs);
     writeToInputFile(permutations);
@@ -212,7 +230,7 @@ public class UniquePaths {
       job.setMapperClass(AggregatorMapper.class);
       job.setReducerClass(AggregatorReducer.class);
       job.setMapOutputKeyClass(Text.class);
-      job.setMapOutputValueClass(DoubleWritable.class);
+      job.setMapOutputValueClass(Text.class);
       job.setOutputKeyClass(Text.class);
       job.setOutputValueClass(DoubleWritable.class);
       job.setJarByClass(UniquePaths.class);
@@ -254,9 +272,9 @@ public class UniquePaths {
         line = scan.nextLine().split(" : ");
         pos = Integer.parseInt(line[0]);
         scc = sccList.get(pos);
-        totalNumPaths = (int) Double.parseDouble(line[1]);
+        totalNumPaths = (int) Double.parseDouble(line[1].trim());
         line = scan.nextLine().split(" : ");
-        totalAvgPathLen = Double.parseDouble(line[1]);
+        totalAvgPathLen = Double.parseDouble(line[1].trim());
         scc.setTotalNumberPaths(totalNumPaths);
         scc.setTotalAvgPathLength(totalAvgPathLen);
       }

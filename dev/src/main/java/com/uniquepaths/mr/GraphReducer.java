@@ -17,23 +17,18 @@ public class GraphReducer
       Context context) throws IOException, InterruptedException {
     StringBuilder strBldr;
     Text outputKey;
-    double totalNumPaths = 1.0;
-    double avgPathLen = 1.0;
     SCC<Integer> scc = constructSCC(values);
-    
-    if (scc.size() > 1) {
-      scc.computeInternalDistances();
-      totalNumPaths = scc.getTotalNumberPaths();
-      avgPathLen = scc.getTotalAvgPathLength();
-    }
+    scc.computeInternalDistances();
+    double totalNumPaths = scc.getTotalNumberPaths();
+    double avgPathLen = scc.getTotalAvgPathLength();
     strBldr = new StringBuilder();
     strBldr.append(scc.getSccId());
-    strBldr.append(" total number of paths: ");
+    strBldr.append(": number ");
     outputKey = new Text(strBldr.toString());
     context.write(outputKey, new DoubleWritable(totalNumPaths));
     strBldr = new StringBuilder();
     strBldr.append(scc.getSccId());
-    strBldr.append(" average path length: ");
+    strBldr.append(": length ");
     outputKey = new Text(strBldr.toString());
     context.write(outputKey, new DoubleWritable(avgPathLen));
   }

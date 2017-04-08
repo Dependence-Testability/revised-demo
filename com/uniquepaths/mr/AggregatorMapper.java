@@ -10,7 +10,7 @@ import org.apache.hadoop.io.Text;
 import org.apache.hadoop.mapreduce.Mapper;
 
 public class AggregatorMapper extends Mapper<Object, Text, Text,
-    DoubleWritable> {
+    Text> {
 
   @Override
   public void map(Object key, Text value, Context context)
