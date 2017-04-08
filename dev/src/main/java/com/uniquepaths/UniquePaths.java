@@ -2,8 +2,8 @@ package com.uniquepaths;
 
 import com.uniquepaths.mr.GraphMapper;
 import com.uniquepaths.mr.GraphReducer;
+import com.uniquepaths.util.Edge;
 import com.uniquepaths.util.Graph;
-import com.uniquepaths.util.GraphTuple;
 import com.uniquepaths.util.Node;
 import com.uniquepaths.util.PathApproximation;
 import com.uniquepaths.util.PathFinder;
@@ -41,19 +41,24 @@ import org.apache.hadoop.util.StringUtils;
 public class UniquePaths {
     
   public static void main(String[] args) {
+    System.out.println(arg);
     double[] result;
     Node<Integer> start;
     Node<Integer> end;
     int superS;
     int superE;
+    String[] phase1Args = Arrays.copyOfRange(args, 3, 5);
+    String[] phase2Args = Arrays.copyOfRange(args, 5, 7);
     Graph<Integer> graph = readGraphFromFile(args[0]);
     int s = Integer.parseInt(args[1]);
     int e = Integer.parseInt(args[2]);
-    args = Arrays.copyOfRange(args, 3, args.length);
     List<SCC<Integer>> sccs
         = StronglyConnectedComponents.getStronglyConnectedComponents(graph);
-    writeToInputFile(sccs);
-    mapReduce(args);
+    List<SCC<Integer>> permutations
+        = StronglyConnectedComponents.getPermutedSCCs(sccs);
+    writeToInputFile(permutations);
+    mapReducePathFinder(phase1Args);
+    mapReduceAggregator(phase2Args);
     readSCCInfo(sccs);
     Graph<Integer> contracted = StronglyConnectedComponents.contractSCCs(sccs);
     start = graph.getNode(s);
@@ -101,12 +106,14 @@ public class UniquePaths {
     SCC<Integer> scc;
     List<String> lines = new ArrayList<>(); 
     try {
-      pw = new PrintWriter("uniquepaths/input/file1");
+      pw = new PrintWriter("uniquepaths/inputPhase1/input");
       for (int i = 0; i < sccs.size(); ++i) {
         scc = sccs.get(i);
-        for (GraphTuple<Integer> edge : scc.getGraphAsEdgeList()) {
+        for (Edge<Integer> edge : scc.getGraphAsEdgeList()) {
           strBldr = new StringBuilder();
           strBldr.append(i);
+          strBldr.append(": ");
+          strBldr.append(scc.getSccId());
           strBldr.append(' ');
           strBldr.append(edge.from);
           strBldr.append(' ');
@@ -118,6 +125,8 @@ public class UniquePaths {
         for (Node<Integer> in : scc.getInNodes()) {
           strBldr = new StringBuilder();
           strBldr.append(i);
+          strBldr.append(": ");
+          strBldr.append(scc.getSccId());
           strBldr.append(" in ");
           strBldr.append(in.getValue());
           pw.println(strBldr);
@@ -125,6 +134,8 @@ public class UniquePaths {
         for (Node<Integer> out : scc.getOutNodes()) {
           strBldr = new StringBuilder();
           strBldr.append(i);
+          strBldr.append(": ");
+          strBldr.append(scc.getSccId());
           strBldr.append(" out ");
           strBldr.append(out.getValue());
           pw.println(strBldr);
@@ -139,7 +150,7 @@ public class UniquePaths {
     }
   }
 
-  private static void mapReduce(String[] args) {
+  private static void mapReducePathFinder(String[] args) {
     Configuration conf;
     GenericOptionsParser optionParser;
     String[] remainingArgs;
@@ -183,6 +194,50 @@ public class UniquePaths {
     }
   }
 
+  private static void mapReduceAggregator(String[] args) {
+    Configuration conf;
+    GenericOptionsParser optionParser;
+    String[] remainingArgs;
+
+    try {
+      conf = new Configuration();
+      optionParser = new GenericOptionsParser(conf, args);
+      remainingArgs = optionParser.getRemainingArgs();
+      if (!(remainingArgs.length != 2 || remainingArgs.length != 4)) {
+        System.err.println("Usage: uniquepaths <in> <out> [-skip skipPatternFile]");
+        System.exit(2);
+      }
+      Job job = Job.getInstance(conf, "uniquepaths");
+      job.setMapperClass(AggregatorMapper.class);
+      job.setReducerClass(AggregatorReducer.class);
+      job.setMapOutputKeyClass(Text.class);
+      job.setMapOutputValueClass(DoubleWritable.class);
+      job.setOutputKeyClass(Text.class);
+      job.setOutputValueClass(DoubleWritable.class);
+      job.setJarByClass(UniquePaths.class);
+
+      List<String> otherArgs = new ArrayList<String>();
+      for (int i=0; i < remainingArgs.length; ++i) {
+        if ("-skip".equals(remainingArgs[i])) {
+          job.addCacheFile(new Path(remainingArgs[++i]).toUri());
+          job.getConfiguration().setBoolean("uniquepaths.skip.patterns", true);
+        } else {
+          otherArgs.add(remainingArgs[i]);
+        }
+      }
+
+      FileInputFormat.addInputPath(job, new Path(otherArgs.get(0)));
+      FileOutputFormat.setOutputPath(job, new Path(otherArgs.get(1)));
+      job.waitForCompletion(true);
+    } catch (IOException e) {
+      e.printStackTrace();
+    } catch (InterruptedException e) {
+      e.printStackTrace();
+    }  catch (ClassNotFoundException e) {
+      e.printStackTrace();
+    }
+  }
+
   private static void readSCCInfo(List<SCC<Integer>> sccList) {
     File file;
     Scanner scan = null;
@@ -192,7 +247,7 @@ public class UniquePaths {
     int totalNumPaths;
     double totalAvgPathLen;
     try {
-      file = new File("uniquepaths/output/part-r-00000");
+      file = new File("uniquepaths/outputPhase2/part-r-00000");
       scan = new Scanner(file);
       while (scan.hasNextLine()) {
         line = scan.nextLine().split(" : ");

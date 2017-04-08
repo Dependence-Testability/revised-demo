@@ -27,31 +27,35 @@ public class GraphReducer
       avgPathLen = scc.getTotalAvgPathLength();
     }
     strBldr = new StringBuilder();
-    strBldr.append(key.get());
-    strBldr.append(" : ");
+    strBldr.append(scc.getSccId());
+    strBldr.append(" total number of paths: ");
     outputKey = new Text(strBldr.toString());
     context.write(outputKey, new DoubleWritable(totalNumPaths));
     strBldr = new StringBuilder();
-    strBldr.append(key.get());
-    strBldr.append(" : ");
+    strBldr.append(scc.getSccId());
+    strBldr.append(" average path length: ");
     outputKey = new Text(strBldr.toString());
     context.write(outputKey, new DoubleWritable(avgPathLen));
   }
 
   private static SCC<Integer> constructSCC(Iterable<Text> values) {
     SCC<Integer> scc = new SCC<>();
+    int sccId = -1;
     for (Text value : values) {
       String[] line = value.toString().split(" ");
-      if (line.length == 3) {
+      if (sccId == -1) {
+        scc.setSccId(Integer.parseInt(line[0]));
+      }
+      if (line.length == 4) {
         // Handling edges
-        scc.addEdge(Integer.parseInt(line[0]), Integer.parseInt(line[1]),
-            Integer.parseInt(line[2]));
-      } else if (line.length == 2) {
+        scc.addEdge(Integer.parseInt(line[1]), Integer.parseInt(line[2]),
+            Integer.parseInt(line[3]));
+      } else if (line.length == 3) {
         // Handling either in or out nodes
-        if (line[0].equals("in")) {
-          scc.addInNode(Integer.parseInt(line[1]));
-        } else if (line[0].equals("out")) {
-          scc.addOutNode(Integer.parseInt(line[1]));
+        if (line[1].equals("in")) {
+          scc.addInNode(Integer.parseInt(line[2]));
+        } else if (line[1].equals("out")) {
+          scc.addOutNode(Integer.parseInt(line[2]));
         }
       }
     }

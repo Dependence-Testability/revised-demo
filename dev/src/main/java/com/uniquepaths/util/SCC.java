@@ -9,6 +9,7 @@ import java.util.Set;
 
 public class SCC<T> extends Graph<T> {
 
+  private int sccId;
   private Set<Node<T>> outNodes;
   private Set<Node<T>> inNodes;
   private List<Node<T>> nodeList;
@@ -24,6 +25,14 @@ public class SCC<T> extends Graph<T> {
     this.nodeList = new ArrayList<>();
     this.numberPaths = new HashMap<>();
     this.avgPathLengths = new HashMap<>();
+  }
+
+  public void setSccId(int sccId) {
+    this.sccId = sccId;
+  }
+
+  public int getSccId() {
+    return sccId;
   }
 
   public void addNode(Node<T> node) {
@@ -124,6 +133,7 @@ public class SCC<T> extends Graph<T> {
   }
 
   public void addEdges(Graph<T> graph, Graph<T> transpose) {
+    // TODO(oluwatobi): get out edges
     Node<T> wholeNode;
     for (Node<T> node : nodeList) {
       wholeNode = graph.getNode(node.getValue());
@@ -144,6 +154,27 @@ public class SCC<T> extends Graph<T> {
         }
       }
     }
+  }
+
+  @Override
+  public SCC<T> clone() {
+    Node<T> from;
+    Node<T> to;
+    int weight;
+    SCC<T> scc = new SCC<>();
+    for (Node<T> node : nodeList) {
+      scc.addNode(node);
+    }
+    for (Map.Entry<T, Node<T>> entry : nodeMap.entrySet()) {
+      from = entry.getValue();
+      for (Map.Entry<Node<T>, Integer> edge : from.getEdges()) {
+        to = edge.getKey();
+        weight = edge.getValue();
+        scc.addEdge(from.getValue(), to.getValue(), weight);
+      }
+    }
+    scc.setSccId(sccId);
+    return scc;
   }
 
   public String toString() {

@@ -64,6 +64,7 @@ public class StronglyConnectedComponents {
         stackNode.setOnStack(false);
         scc.addNode(stackNode);
         stackNode.setSccId(sccId);
+        scc.setSccId(sccId);
       } while (stackNode != node);
       scc.addEdges(graph, transpose);
       sccList.add(scc);
@@ -110,5 +111,22 @@ public class StronglyConnectedComponents {
       }
     }
     return transpose;
+  }
+
+  public static <T> List<SCC<T>> getPermutedSCCs(List<SCC<T>> sccList) {
+    SCC<T> newScc;
+    int totalNumberOfPermutations;
+    List<SCC<T>> permutations = new ArrayList<>();
+    for (SCC<T> scc : sccList) {
+      for (Node<T> inNode : scc.getInNodes()) {
+        for (Node<T> outNode : scc.getOutNodes()) {
+          newScc = scc.clone();
+          newScc.addInNode(inNode.getValue());
+          newScc.addOutNode(outNode.getValue());
+          permutations.add(newScc);
+        }
+      }
+    }
+    return permutations;
   }
 }

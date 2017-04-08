@@ -11,8 +11,8 @@ import java.util.Random;
 
 public class PathApproximation {
 
-  private static final int N_BASE = 50000;
-  private static final int N_PRIME = 2000;
+  private static final int N_BASE = 10000;
+  private static final int N_PRIME = 5000;
   private static Random generator = new Random();
 
   public static <T> double[] lengthDistribution(Graph<T> graph,

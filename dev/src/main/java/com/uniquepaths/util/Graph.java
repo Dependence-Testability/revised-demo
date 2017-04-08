@@ -45,7 +45,7 @@ public class Graph<T> {
     return nodeMap.get(v);
   }
 
-  protected Set<Map.Entry<T, Node<T>>> getNodes() {
+  public Set<Map.Entry<T, Node<T>>> getNodes() {
     return nodeMap.entrySet();
   }
 
@@ -64,7 +64,7 @@ public class Graph<T> {
     return node;
   }
 
-  protected boolean containsNode(T value) {
+  public boolean containsNode(T value) {
     return nodeMap.containsKey(value);
   }
 
@@ -79,13 +79,13 @@ public class Graph<T> {
     return added;
   }
 
-  public List<GraphTuple<T>> getGraphAsEdgeList() {
-    List<GraphTuple<T>> list = new ArrayList<>();
+  public List<Edge<T>> getGraphAsEdgeList() {
+    List<Edge<T>> list = new ArrayList<>();
     Node<T> node;
     for (Map.Entry<T, Node<T>> nodeInfo : nodeMap.entrySet()) {
       node = nodeInfo.getValue();
       for (Map.Entry<Node<T>, Integer> edge : node.getEdges()) {
-        list.add(new GraphTuple<T>(node.getValue(), edge.getKey().getValue(),
+        list.add(new Edge<T>(node.getValue(), edge.getKey().getValue(),
             edge.getValue()));
       }
     }

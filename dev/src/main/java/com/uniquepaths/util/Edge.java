@@ -1,12 +1,12 @@
 package com.uniquepaths.util;
 
-public class GraphTuple<T> {
+public class Edge<T> {
 
   public final T from;
   public final T to;
   public final Integer weight;
 
-  public GraphTuple(T from, T to, Integer weight) {
+  public Edge(T from, T to, Integer weight) {
     this.from = from;
     this.to = to;
     this.weight = weight;
