@@ -241,7 +241,6 @@ public class PathFinder {
           calculatePath(sorted, i, adj);
           Map<T, Integer> weightValues
               = currCasted.getEdgeWeights(adjCasted.getValue());
-              System.out.println(weightValues);
           int edgeCount = currCasted.getEdgeCount(adjCasted.getValue());
           for (Map.Entry<Integer, Integer> entry
               : adj.getDistances().entrySet()) {
