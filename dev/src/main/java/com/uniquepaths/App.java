@@ -67,7 +67,7 @@ public class App {
     }
 
     System.out.println("Stage 3: Reduce");
-    contracted = StronglyConnectedComponents.contractSCCs(sccs);
+    contracted = StronglyConnectedComponents.contractSCCs(sccs, graph);
     Node<Integer> start = graph.getNode(s);
     Node<Integer> end = graph.getNode(e);
 

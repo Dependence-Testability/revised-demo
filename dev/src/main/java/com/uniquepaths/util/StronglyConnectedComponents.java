@@ -71,9 +71,11 @@ public class StronglyConnectedComponents {
     }
   }
 
-  public static <T> Graph<T> contractSCCs(List<SCC<T>> sccList) {
+  public static <T> Graph<T> contractSCCs(List<SCC<T>> sccList,
+       Graph<T> graph) {
     Graph<T> contracted = new Graph<>();
     SCC<T> scc;
+    SuperNode<T> superNode;
     Node<T> adjNode;
     T value;
     int sccId;
@@ -92,6 +94,21 @@ public class StronglyConnectedComponents {
             sccId = adjNode.getSccId();
             contracted.addEdge(value,
                 sccList.get(sccId).getExpandedNodes().get(0).getValue());
+            superNode = (SuperNode<T>) contracted.getNode(value);
+            for (Node<T> outNode : scc.getOutNodes()) {
+              for (Map.Entry<Node<T>, Integer> outEdge : outNode.getEdges()) {
+                Node<T> outEdgeNode = outEdge.getKey();
+                if (!scc.containsNode(outEdgeNode)) {
+                  int externalSCCId = outEdgeNode.getSccId();
+                  superNode.incrementEdgeCount(sccList.get(externalSCCId)
+                        .getExpandedNodes().get(0).getValue());
+                  superNode.addEdgeWeight(
+                        sccList.get(externalSCCId).getExpandedNodes().get(0)
+                            .getValue(), outEdgeNode.getValue(),
+                                outEdge.getValue());
+                }
+              }
+            }
           }
         }
       }

@@ -79,7 +79,8 @@ public class UniquePaths {
     mapReducePathFinder(phase1Args);
     mapReduceAggregator(phase2Args);
     readSCCInfo(sccs);
-    Graph<Integer> contracted = StronglyConnectedComponents.contractSCCs(sccs);
+    Graph<Integer> contracted
+        = StronglyConnectedComponents.contractSCCs(sccs, graph);
     start = graph.getNode(s);
     end = graph.getNode(e);
     superS = sccs.get(start.getSccId()).getExpandedNodes().get(0).getValue();
@@ -229,7 +230,7 @@ public class UniquePaths {
       Job job = Job.getInstance(conf, "uniquepaths");
       job.setMapperClass(AggregatorMapper.class);
       job.setReducerClass(AggregatorReducer.class);
-      job.setMapOutputKeyClass(Text.class);
+      job.setMapOutputKeyClass(IntWritable.class);
       job.setMapOutputValueClass(Text.class);
       job.setOutputKeyClass(Text.class);
       job.setOutputValueClass(DoubleWritable.class);
@@ -269,12 +270,12 @@ public class UniquePaths {
       file = new File("uniquepaths/outputPhase2/part-r-00000");
       scan = new Scanner(file);
       while (scan.hasNextLine()) {
-        line = scan.nextLine().split(" : ");
+        line = scan.nextLine().split(" ", 2);
         pos = Integer.parseInt(line[0]);
         scc = sccList.get(pos);
-        totalNumPaths = (int) Double.parseDouble(line[1].trim());
-        line = scan.nextLine().split(" : ");
-        totalAvgPathLen = Double.parseDouble(line[1].trim());
+        totalNumPaths = (int) Double.parseDouble(line[1].split(":")[1].trim());
+        line = scan.nextLine().split(" ", 2);
+        totalAvgPathLen = Double.parseDouble(line[1].split(":")[1].trim());
         scc.setTotalNumberPaths(totalNumPaths);
         scc.setTotalAvgPathLength(totalAvgPathLen);
       }

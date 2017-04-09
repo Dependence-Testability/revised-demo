@@ -234,17 +234,26 @@ public class PathFinder {
         if (curr.hasEdge(sorted.get(i))) {
           Node<T> adj = sorted.get(i);
           SuperNode<T> currCasted = (SuperNode<T>) curr;
+          SuperNode<T> adjCasted = (SuperNode<T>) adj;
           numPaths = currCasted.scc.getTotalNumberPaths();
           avgPathLen = currCasted.scc.getTotalAvgPathLength();
           avgPathRound = (int) Math.round(avgPathLen);
           calculatePath(sorted, i, adj);
+          Map<T, Integer> weightValues
+              = currCasted.getEdgeWeights(adjCasted.getValue());
+              System.out.println(weightValues);
+          int edgeCount = currCasted.getEdgeCount(adjCasted.getValue());
           for (Map.Entry<Integer, Integer> entry
               : adj.getDistances().entrySet()) {
-            currCount = curr.getDistanceCount(entry.getKey() + avgPathRound)
+            double average = 0.0;
+            for (Map.Entry<T, Integer> outEdge : weightValues.entrySet()) {
+              average += outEdge.getValue();
+            }
+            currCount = curr.getDistanceCount(entry.getKey())
                 == null ? 0 : curr.getDistanceCount(
                     entry.getKey() + avgPathRound);
-            curr.addDistance(entry.getKey() + avgPathRound,
-                (entry.getValue() + currCount) * numPaths) ;
+            curr.addDistance(entry.getKey() + avgPathRound + (int) average,
+                (entry.getValue() + currCount) * numPaths + edgeCount);
           }
         }
       }
