@@ -2,7 +2,8 @@
 ==============
 
 A second attempt at estimating the number paths between two nodes in a graph. 
-Part of the Special Topics at Amherst College, Dependence and Testability.
+Semester project as a part of Dependence and Testability, a Computer Science
+Special Topics at Amherst College.
 
 Refactored versions of code from [Dependence-Testability/Demo](https://github.com/Dependence-Testability/Demo) as written by:
     - [Oluwatobi Oni-Orisan](https://github.com/oluwatobi)
