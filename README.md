@@ -1,7 +1,14 @@
-# revised-demo
+# unique-paths
+==============
 
 A second attempt at estimating the number paths between two nodes in a graph. 
 Part of the Special Topics at Amherst College, Dependence and Testability.
+
+Refactored versions of code from [Dependence-Testability/Demo](https://github.com/Dependence-Testability/Demo) as written by:
+    - [Oluwatobi Oni-Orisan](https://github.com/oluwatobi)
+    - [Daniel Mariselli](https://github.com/dmariselli)
+    - [Mohammed Ibrahim](https://github.com/Yasirmod17)
+    - [Alexander Chou](https://github.com/chounese)
 
 ## Overview
 Computing the number of paths in an arbitrary graph between two nodes is a
